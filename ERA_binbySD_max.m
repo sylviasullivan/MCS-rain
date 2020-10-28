@@ -11,7 +11,7 @@
 % field2 = field by which to bin: 'sd','cape'
 % numbin = number of bins to use
 
-function [prMAX,rhMAX,tMAX,sdMAX,capeMAX,depthMAX] = ERA_binbySD(avg,field,numext,field2,numbin)
+function [prMAX,rhMAX,tMAX,sdMAX,capeMAX,depthMAX] = ERA_binbySD_max(avg,field,numext,field2,numbin)
     eps = 0.01802/0.02897;
 
     % read in the files of collocated T, omega, CAPE, etc.
