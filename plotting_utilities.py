@@ -9,7 +9,7 @@ import scipy as sp
 import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
-import warnings
+import warnings, time
 
 from scipy.optimize import curve_fit
 from matplotlib.ticker import FuncFormatter
@@ -18,18 +18,6 @@ plt.rcParams.update({'font.size': 12})
 
 warnings.filterwarnings(action='ignore')
 
-# Set scientific constants
-#density of water (kg m-3)
-rho = 1000 
-#gravitational acceleration (m s-2)
-g = 9.8 
-#for relative humidity and saturation deficit
-eps = 0.01802/0.02897
-#pressure values of interest
-p_vals = np.array([550,700,850,470])
-
-
-
 # Files to access NetCDF data and store cape and precipitation into numpy arrays
 def file_concatenator(numerical_list):
     #Takes a list of numbers corresponding to filenumbers/years 
@@ -37,7 +25,7 @@ def file_concatenator(numerical_list):
     file_names = []
     
     #base directory where the desired files are located
-    basedir = '/xdisk/sylvia/MCS_clim/ausgabe/meteo_clim/nc/ERAI/'
+    basedir = '/groups/sylvia/JAS-MCS-rain/ERAI/'
     
     #iterates through numbers
     for value in numerical_list:
@@ -65,13 +53,49 @@ def nc_open_compile(files,variable_name,compile_type='append'):
     return variable
 
 
+def negative_vals(y,x):
+    #function to take negative values in some array y and couple with corresponding x values
+    
+    #taking array values less than 0, negative values
+    indices = np.where(y<0)
+
+    #creating a new array of just negative values from w
+    y_n = y[indices]
+
+    #taking cape values corresponding to negative w
+    x_n = x[indices]
+
+    #making the values positive for logarithms
+    y_n = abs(y_n)
+    
+    return y_n,x_n
+
+def positive_vals(y,x):
+    #function to take negative values in some array y and couple with corresponding x values
+    
+    #taking array values less than 0, negative values
+    indices = np.where(y>=0)
+
+    #creating a new array of just negative values from w
+    y_p = y[indices]
+
+    #taking cape values corresponding to negative w
+    x_p = x[indices]
+
+    #making the values positive for logarithms
+    y_p = abs(y_p)
+    
+    return y_p,x_p
 
 def negative_to_nan(array):
-    #simply converts negatives to NaNs
+    #simply converts not positive values to NaNs
     array = np.where(array<=0, np.NaN, array)
     return array
 
-
+def positive_to_nan(array):
+    #simply converts not negative values  to NaNs
+    array = np.where(array>=0, np.NaN, array)
+    return array
 
 def nan_array(shape):
     an_array = np.empty(shape)
@@ -82,39 +106,48 @@ def nan_array(shape):
 # Finding the mean and percentiles of the data
 def maxk_arg(matrix,k):
     #returns indices of max k elements in a matrix
-    matrix_new = matrix.flatten()
+    if len(matrix.shape) > 1:
+        matrix_new = matrix.flatten()
+    else:
+        matrix_new = matrix
+    #remove any nans
+    matrix_new = matrix_new[~np.isnan(matrix_new)]
     matrix_arg = np.argsort(matrix_new)
     return matrix_arg[-k:]
 
 
-def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=95,pc2=99.99,n_max=5):
+def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=95,pc2=99,n_max=5):
     #Creates a range of bin values within which the data should lie, collects indices of x-variables
     #which fall in those bins and calls the corresponding y-variable values, calculates means
     #and percentiles. 
     
-    #n_bins = number of bins, lower and upper = bounds of bins, threshold is a required number
-    #of values to have if statistics are to be calculated, pc1,2 are percentiles, assumed 95 and 99
+    #n_bins = number of bins
+    #lower and upper = bounds of bins
+    #threshold is a required number of values if statistics are to be calculated
+    #pc1,2 are percentiles, assumed 95 and 99.9
+    #n_max = number of maximum values to extract in each bin
     
     cc = np.linspace(lower,upper,n_bins)
     
     #nan filled arrays created
-    x_bins = nan_array((n_bins,1))
-    y_bins = nan_array((n_bins,1))
+    x_bins = nan_array((n_bins,))
+    y_bins = nan_array((n_bins,))
     
-    y_bins_pc1 = nan_array((n_bins,1))
-    y_bins_pc2 = nan_array((n_bins,1))
+    y_bins_pc1 = nan_array((n_bins,))
+    y_bins_pc2 = nan_array((n_bins,))
     
     x_max = nan_array((n_bins,n_max))
     y_max = nan_array((n_bins,n_max))
     
-    x_bins_error = nan_array((n_bins,1))
-    y_bins_error = nan_array((n_bins,1))
+    x_bins_error = nan_array((n_bins,))
+    y_bins_error = nan_array((n_bins,))
     
     #reduced bin values for the loop below
     cc_red = cc[:-1]
     for i, value in enumerate(cc_red):
         #indices of values within bins
-        j = np.where((x_variable >= value) & (x_variable < cc[i+1]))
+        j = np.where((x_variable >= cc[i]) & (x_variable < cc[i+1]))
+        
         x_vals = x_variable[j]
         y_vals = y_variable[j]
 
@@ -133,6 +166,9 @@ def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=9
 
         if len(j[0]) >= n_max:
             j = maxk_arg(y_vals,n_max)
+            # The same filter applied in the maxk_arg function must be applied here also.
+            x_vals = x_vals[~np.isnan(x_vals)]
+            y_vals = y_vals[~np.isnan(y_vals)]
             x_max[i] = x_vals[j]
             y_max[i] = y_vals[j]
     
