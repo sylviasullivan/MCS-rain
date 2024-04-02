@@ -116,7 +116,7 @@ def maxk_arg(matrix,k):
     return matrix_arg[-k:]
 
 
-def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=95,pc2=99,n_max=5):
+def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=95,pc2=99.9,n_max=5):
     #Creates a range of bin values within which the data should lie, collects indices of x-variables
     #which fall in those bins and calls the corresponding y-variable values, calculates means
     #and percentiles. 
@@ -164,13 +164,13 @@ def bin_stat_function(n_bins,lower,upper,x_variable,y_variable,threshold=0,pc1=9
             y_bins_pc1[i] = np.nanpercentile(y_vals,pc1)
             y_bins_pc2[i] = np.nanpercentile(y_vals,pc2)
 
-        if len(j[0]) >= n_max:
-            j = maxk_arg(y_vals,n_max)
-            # The same filter applied in the maxk_arg function must be applied here also.
-            x_vals = x_vals[~np.isnan(x_vals)]
-            y_vals = y_vals[~np.isnan(y_vals)]
-            x_max[i] = x_vals[j]
-            y_max[i] = y_vals[j]
+        #if len(j[0]) >= n_max:
+        #    j = maxk_arg(y_vals,n_max)
+        #    # The same filter applied in the maxk_arg function must be applied here also.
+        #    x_vals = x_vals[~np.isnan(x_vals)]
+        #    y_vals = y_vals[~np.isnan(y_vals)]
+        #    x_max[i] = x_vals[j]
+        #    y_max[i] = y_vals[j]
     
     return x_bins,y_bins,y_bins_pc1,y_bins_pc2,x_bins_error,y_bins_error,x_max,y_max
 

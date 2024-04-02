@@ -2,3 +2,10 @@ d1d2d3/
 npy/
 figures/
 ERAI/
+RCE-postprocessed/
+DYAMOND/*.nc
+DYAMOND/*.txt
+.ipynb_checkpoints/
+ __pycache__/*.pyc
+hydrological_exploration/.ipynb_checkpoints/*
+
