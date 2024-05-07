@@ -10,6 +10,8 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
 import warnings, time
+from scipy import stats
+from scipy.stats import pearsonr, zscore
 
 from scipy.optimize import curve_fit
 from matplotlib.ticker import FuncFormatter
@@ -17,6 +19,28 @@ from matplotlib.ticker import FuncFormatter
 plt.rcParams.update({'font.size': 12})
 
 warnings.filterwarnings(action='ignore')
+
+# Evaluate the correlation coefficient between precip efficiency and var.
+# i are the tropical lat/lon indices and those for which omega < 0.
+# precipeff are the precipitation efficiencies
+def pe_cc(var, i, precipeff):
+    
+    var_nc = negative_to_nan( var )[i[:,0]]
+    j = np.argwhere( (precipeff > 0) & (zscore(var_nc, nan_policy='omit') <= 2) )
+    ref = stats.pearsonr( var_nc[j[:,0]], precipeff[j[:,0]] )
+    return ref    
+
+# Defines the appropriate indices for calculating a linear regression between x and y
+# and then calculates it
+def linindx(x, y):
+    mean_y = np.nanmean(y)
+    std_y = np.nanstd(y)
+    zscores = np.abs((y - mean_y) / std_y)
+    i = np.argwhere( ~np.isnan(x) & ~np.isnan(y) & (zscores < 2) )
+    x_input = x[i[:,0]]
+    out = stats.linregress( x=x[i[:,0]], y=y[i[:,0]] )
+    y_predicted = x_input*out.slope + out.intercept
+    return out, y_predicted, x_input
 
 # Files to access NetCDF data and store cape and precipitation into numpy arrays
 def file_concatenator(numerical_list):
