@@ -1,5 +1,19 @@
 import numpy as np
 
+# Function to calculate dew point temperature
+# T_in [=] K; RH_in [=] not percentage - decimal
+def dew_point_temperature( T_in, RH_in ):
+    #Lawrence BAMS 2005 approximation for Tdew
+    #Tdew = T_RCE - ( (100 - 100*RH[0])/5 )
+    #Tdew = xr.broadcast( Tdew, Tmean )[0].mean( dim={'clusters'} )
+
+    #use the Magnus formula instead here
+    a = 17.27
+    b = 237.7
+    gamma = a*(T_in - 273.15)/(b + (T_in - 273.15)) + np.log(RH_in)
+    Td = b*gamma / (a - gamma) + 273.15
+    return Td
+    
 # Function to calculate the saturation vapor pressure over liquid.
 # psatL [=] Pa; t_in [=] K
 def satVapP_liq(t_in):
@@ -66,7 +80,7 @@ def satMR_liq(t_in,p_in):
     factor = a7 + a8/t_in + a9*np.log(t_in) + a10*t_in
     psatL = a1 + a2/t_in + a3*np.log(t_in) + a4*t_in + np.arctan(a5*(t_in - a6))*factor
     psatL = np.exp(psatL)
-    qvsatl = esp*psatL/(p_in)
+    qvsatl = eps*psatL/(p_in)
     return qvsatl
 
 # Function to calculate the potential temperature

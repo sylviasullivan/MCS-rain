@@ -20,12 +20,44 @@ plt.rcParams.update({'font.size': 12})
 
 warnings.filterwarnings(action='ignore')
 
-# Evaluate the correlation coefficient between precip efficiency and var.
-# i are the tropical lat/lon indices and those for which omega < 0.
-# precipeff are the precipitation efficiencies
-def pe_cc(var, i, precipeff):
+def RCE_concat( input_arrays, var ):
+    return np.concatenate( [ii[var].to_numpy() for ii in input_arrays], axis=0 )
+
+def read_RCE_files( path ):
+    mean_290 = xr.open_dataset( path + 'RCE_COL_MEAN_290.nc' )
+    mean_295 = xr.open_dataset( path + 'RCE_COL_MEAN_295.nc' )
+    mean_300 = xr.open_dataset( path + 'RCE_COL_MEAN_300.nc' )
+    mean_305 = xr.open_dataset( path + 'RCE_COL_MEAN_305.nc' )
+    mean_310 = xr.open_dataset( path + 'RCE_COL_MEAN_310.nc' )
+    means = [ mean_290, mean_295, mean_300, mean_305, mean_310 ]
     
-    var_nc = negative_to_nan( var )[i[:,0]]
+    p99_290 = xr.open_dataset( path + 'RCE_COL_99_290.nc' )
+    p99_295 = xr.open_dataset( path + 'RCE_COL_99_295.nc' )
+    p99_300 = xr.open_dataset( path + 'RCE_COL_99_300.nc' )
+    p99_305 = xr.open_dataset( path + 'RCE_COL_99_305.nc' )
+    p99_310 = xr.open_dataset( path + 'RCE_COL_99_310.nc' )
+    p99s = [ p99_290, p99_295, p99_300, p99_305, p99_310 ]
+    
+    clusters_290 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_290.nc' )
+    clusters_295 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_295.nc' )
+    clusters_300 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_300.nc' )
+    clusters_305 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_305.nc' )
+    clusters_310 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_310.nc' )
+    
+    clusters = [clusters_290, clusters_295, clusters_300, clusters_305, clusters_310]
+    rad = []
+    for c in clusters:
+        rad.append( 2*(c['cluster_sizes']*9/np.pi)**(0.5) )
+    
+    return means, p99s, rad
+
+# Evaluate the correlation coefficient between precip efficiency and var.
+# i are the tropical lat/lon indices and those for which omega < 0. 
+# precipeff are the precipitation efficiencies
+def pe_cc(var, precipeff):
+    
+    #var_nc = negative_to_nan( var )[i[:,0]] - previously when i was the second input above
+    var_nc = var
     j = np.argwhere( (precipeff > 0) & (zscore(var_nc, nan_policy='omit') <= 2) )
     ref = stats.pearsonr( var_nc[j[:,0]], precipeff[j[:,0]] )
     return ref    
@@ -40,7 +72,7 @@ def linindx(x, y):
     x_input = x[i[:,0]]
     out = stats.linregress( x=x[i[:,0]], y=y[i[:,0]] )
     y_predicted = x_input*out.slope + out.intercept
-    return out, y_predicted, x_input
+    return out, y_predicted, x_input, zscores
 
 # Files to access NetCDF data and store cape and precipitation into numpy arrays
 def file_concatenator(numerical_list):
