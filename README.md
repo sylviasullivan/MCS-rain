@@ -5,6 +5,6 @@ The scripts in this repository look at relationships of environmental moisture, 
 
 - *Figures\_MCS-rainfall-article*.ipynb* - Jupyter Notebooks to reproduce article figures, including 0) PDFs of MCS precipitation across the two datasets, `Obs-Set' referring to figures generated from tracking data, and `RCE-Set' referring to figures generated from RCE simulations. For both `Obs-Set' and `RCE-Set', 1 = column saturation fraction (CSF)-precipitation relations, 2 = lower-tropospheric saturation deficit (SD)-CAPE relations, 3 = CAPE-ascent rate relations, and 4 = profiles and PDFs of condensate.
 
-- RCE-MCS-identification.ipynb - Performs identification of MCSs within the RCE simulation output and extracts coincident CAPE, ascent rates, rainfall, condensate amounts, etc.
+- *RCE-MCS-identification.ipynb* - Performs identification of MCSs within the RCE simulation output and extracts coincident CAPE, ascent rates, rainfall, condensate amounts, etc.
 
-- zero\_buoyancy\_plume.py - Perform zero-buoyancy plume model calculations using the tracking data or RCE simulation output.
+- *zero\_buoyancy\_plume.py* - Perform zero-buoyancy plume model calculations using the tracking data or RCE simulation output.
