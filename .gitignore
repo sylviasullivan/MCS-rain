@@ -14,3 +14,4 @@ DYAMOND/*.txt
 .ipynb_checkpoints/
 __pycache__/*.pyc
 hydrological_exploration/.ipynb_checkpoints/*
+old_codes/
