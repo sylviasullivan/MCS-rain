@@ -75,7 +75,7 @@ def linindx(x, y):
     return out, y_predicted, x_input, zscores
 
 # Files to access NetCDF data and store cape and precipitation into numpy arrays
-def file_concatenator(numerical_list):
+def file_concatenator_ERAI(numerical_list):
     #Takes a list of numbers corresponding to filenumbers/years 
     #and compiles the corresponding list of filenames
     file_names = []
@@ -89,6 +89,23 @@ def file_concatenator(numerical_list):
         file_names = np.append(file_names,(basedir + 'colloc_' + str(value) + '_NZ.nc'))
         
     return file_names
+
+
+def file_concatenator_ERA5(numerical_list):
+    #Takes a list of numbers corresponding to filenumbers/years
+    #and compiles the corresponding list of filenames
+    file_names = []
+
+    #base directory where the desired files are located
+    basedir = '/groups/sylvia/JAS-MCS-rain/ERA5/'
+
+    #iterates through numbers
+    for value in numerical_list:
+        #appending list of files
+        file_names = np.append(file_names,(basedir + 'colloc5_' + str(value) + '_NZ.nc'))
+
+    return file_names
+
 
 
 def nc_open_compile(files,variable_name,compile_type='append'):
