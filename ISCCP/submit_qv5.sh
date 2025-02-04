@@ -5,16 +5,16 @@
 #SBATCH --qos=user_qos_sylvia
 #SBATCH --output=/xdisk/sylvia/ERA_logs/qvlog_%j.out
 #SBATCH --error=/xdisk/sylvia/ERA_logs/qvlog_%j.out
-#SBATCH --time=16:00:00
+#SBATCH --time=4444:00:00
 #SBATCH --mem=50gb
 #SBATCH --nodes=1
 #SBATCH --ntasks=28
 
-source activate era5
+#source activate era5
 
 for year in 2000; do
-    for month in 1 2 3 4 5 6 7 8 9 10 11 12; do
-        echo Starting for year $year
+    for month in 1; do
+        echo Starting for year $year and month $month
 
         # Dynamically handle single-digit and double-digit months
         if [ "$month" -lt 10 ]; then

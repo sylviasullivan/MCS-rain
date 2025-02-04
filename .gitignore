@@ -1,3 +1,8 @@
+ERA5/*
+ISCCP/*.npy
+ISCCP/*.nc
+ISCCP/output/*
+ISCCP/output-take1/*.csv
 DYAMOND/
 RCE-postprocessed/*
 ERAI/*

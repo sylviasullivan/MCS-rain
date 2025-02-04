@@ -10,11 +10,11 @@ def collocate_ERA5( year, month, var ):
     # Dictionary to map var to ERA5 variable name
     var_mapping = {
         "cape": "cape",
-        "temperature": "temperature",
+        "temperature": "t",
         "qv": "q",
-        "qc": "specific_cloud_liquid_water_content",
-        "qi": "specific_cloud_ice_water_content",
-        "w": "verticala_velocity"
+        "qc": "clwc",
+        "qi": "ciwc",
+        "w": "vertical_velocity"
     }
 
     # Load ERA-5 data
