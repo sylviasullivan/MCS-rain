@@ -4,9 +4,9 @@ c.retrieve(
     'reanalysis-era5-single-levels',
     {
         'product_type':'reanalysis',
-        'variable':'convective_available_potential_energy',
+        'variable':'total_precipitation',
         'year':'2000',
-        'month':'05',
+        'month':'12',
         'day':['01','02','03','04','05','06','07',
                '08','09','10','11','12','13','14',
                '15','16','17','18','19','20','21',
@@ -19,4 +19,4 @@ c.retrieve(
         'area':'10/-180/-10/180',
         'format':'netcdf'
     },
- '/xdisk/sylvia/ERA5_output/ERA5_cape_tropical.nc')
+ '/xdisk/sylvia/ERA5_output/ERA5_pacc_tropical.nc')

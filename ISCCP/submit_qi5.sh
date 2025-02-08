@@ -12,8 +12,8 @@
 
 #source activate era5
 
-for year in 2005 2006 2007 2008; do
-    for month in 1 2 3 4 5 6 7 8 9 10 11 12; do
+for year in 2000 2001 2003 2004; do
+    for month in 1 2 3 4 5 6 7 8 9 10 11; do
         echo Starting for year $year and month $month
 
         # Dynamically handle single-digit and double-digit months
@@ -56,7 +56,7 @@ EOL
     sbatch --wait --output=/dev/null /groups/sylvia/JAS-MCS-rain/ISCCP/submit_QI5request.sh
     # Wait until this job is done
 
-    python collocate_ERA5_vectorized.py ${year} ${month} 'qi'
+    python collocate_ERA5_3D.py ${year} ${month} 'qi'
   done
 done
 

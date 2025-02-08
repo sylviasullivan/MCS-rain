@@ -73,7 +73,8 @@ def collocate_ERA5_3D_all_vals( year, month, var ):
         "cs_radius", "center_lat", "center_lon", "conv_fraction", "num_cores", "cs_temp",
         "min_lat", "max_lat", "min_lon", "max_lon"
     ]
-    netcdf_file = f"/groups/sylvia/JAS-MCS-rain/ISCCP/colloc_{year}_NZ.nc"
+    formatted_month = f"{month:02d}"
+    netcdf_file = f"/groups/sylvia/JAS-MCS-rain/ISCCP/colloc_{year}{formatted_month}_{var}_NZ.nc"
     pp = 1
     for t, (min_lat, max_lat), (min_lon, max_lon) in zip(times, lat_bounds, lon_bounds):
         print( pp, len(times) )
@@ -98,68 +99,25 @@ def collocate_ERA5_3D_all_vals( year, month, var ):
     # Create the DataFrame, including all variables from DD
     df = pd.DataFrame(DD[:, :len(convective_vars)], columns=convective_vars)
 
-    if not os.path.exists(netcdf_file):
-        # Create a new xarray Dataset and add all convective system properties
-        ds = xr.Dataset(
-            {
-                **{var: (["occurrence"], df[var].values) for var in convective_vars},
-                f"{var}_mean": (["occurrence", "pressure_level"], np.array(mean_results)),
-                f"{var}_99": (["occurrence", "pressure_level"], np.array(quantile_results)),
-            },
-            coords={
-                "occurrence": np.arange(len(df)),
-                "pressure_level": ERA_var.pressure_level.values,
-            },
-        )
-        ds.to_netcdf(netcdf_file)
-        print(f"Created NetCDF file: {netcdf_file}")
-    else:
-        # Open the existing NetCDF file and append the new variables
-        with xr.open_dataset(netcdf_file, mode="r+") as ds:
-            for var in convective_vars:
-                if var in ds:
-                    # Append new values along the 'occurrence' dimension
-                    existing_data = ds[var].values
-                    new_data = np.concatenate([existing_data, df[var].values], axis=0)
-                    ds[var] = xr.DataArray(new_data, dims=["occurrence"])
-                else:
-                    # Add the variable if it doesn't already exist
-                    ds[var] = xr.DataArray(df[var].values, dims=["occurrence"])
+    mean_results = np.array( [item[0] for item in results] )  # Extract mean arrays
+    quantile_results = np.array( [item[1] for item in results] )  # Extract quantile arrays
+
+    assert mean_results.shape[1] == len(ERA_var.pressure_level.values), "Mean results have incorrect shape!"
+    assert quantile_results.shape[1] == len(ERA_var.pressure_level.values), "Quantile results have incorrect shape!"
     
-            # Handle f"{var}_mean" and f"{var}_99"
-            if f"{var}_mean" in ds:
-                # Append new mean values
-                existing_means = ds[f"{var}_mean"].values
-                new_means = np.concatenate([existing_means, np.array(mean_results)], axis=0)
-                ds[f"{var}_mean"] = xr.DataArray( new_means,
-                    dims=["occurrence", "pressure_level"],
-                    coords={ "occurrence": np.arange(len(new_means)), "pressure_level": ERA_var.pressure_level.values, },
-                )
-            else:
-                # Add mean values if they don't already exist
-                ds[f"{var}_mean"] = xr.DataArray( np.array(mean_results),
-                    dims=["occurrence", "pressure_level"],
-                    coords={ "occurrence": np.arange(len(df)), "pressure_level": ERA_var.pressure_level.values, },
-                )
-
-            if f"{var}_99" in ds:
-                # Append new 99th quantile values
-                existing_quants = ds[f"{var}_99"].values
-                new_quants = np.concatenate([existing_quants, np.array(quantile_results)], axis=0)
-                ds[f"{var}_99"] = xr.DataArray( new_quants,
-                    dims=["occurrence", "pressure_level"],
-                    coords={ "occurrence": np.arange(len(new_quants)), "pressure_level": ERA_var.pressure_level.values, },
-                )
-            else:
-                # Add 99th quantile values if they don't already exist
-                ds[f"{var}_99"] = xr.DataArray( np.array(quantile_results),
-                    dims=["occurrence", "pressure_level"],
-                    coords={ "occurrence": np.arange(len(df)), "pressure_level": ERA_var.pressure_level.values, },
-                )
-
-            # Save changes to the NetCDF file
-            ds.to_netcdf( netcdf_file, mode="a" )
-            print(f"Appended data to existing NetCDF file: {netcdf_file}")
+    # Create a new xarray Dataset and add all convective system properties
+    ds = xr.Dataset(
+         {
+            **{conv_var: (["occurrence"], df[conv_var].values) for conv_var in convective_vars},
+            f"{var}_mean": (["occurrence", "pressure_level"], mean_results),
+            f"{var}_99": (["occurrence", "pressure_level"], quantile_results),
+         },
+         coords={
+             "occurrence": np.arange(len(df)),
+             "pressure_level": ERA_var.pressure_level.values,
+         },)
+    ds.to_netcdf(netcdf_file)
+    print(f"Created NetCDF file: {netcdf_file}")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 # Collocate an ERA-5 variable to MCSs in the given year and month
 # var is assumed to be a string representing the variable to collocate.
 
-def collocate_ERA5_3D_core_vals( year, month, var ):
+def collocate_ERA5_2D_core_vals( year, month, var ):
     import xarray as xr
     import numpy as np
     import pandas as pd
@@ -11,6 +11,8 @@ def collocate_ERA5_3D_core_vals( year, month, var ):
     # Dictionary to map var to ERA5 variable name
     var_mapping = {
         "cape": "cape",
+        "pmax": "crr",
+        "pacc": "tp",
         "temperature": "t",
         "qv": "q",
         "qc": "clwc",
@@ -62,7 +64,7 @@ def collocate_ERA5_3D_core_vals( year, month, var ):
     core_lats = DD[:,4]
     core_lons = DD[:,5]
     
-    # Vectorized selection for ERA5 data
+    # Set up iterative selection for ERA5 data
     results = []
     convective_vars = [
         "year", "month", "day", "hour",
@@ -73,6 +75,8 @@ def collocate_ERA5_3D_core_vals( year, month, var ):
     formatted_month = f"{month:02d}"
     netcdf_file = f"/groups/sylvia/JAS-MCS-rain/ISCCP/colloc_{year}{formatted_month}_{var}_NZ_core.nc"
     pp = 1
+    
+    # Perform iterative selection for ERA5 data
     for t, c_lat, c_lon in zip(times, core_lats, core_lons):
         print( pp, len(times) )
         pp = pp + 1
@@ -80,7 +84,7 @@ def collocate_ERA5_3D_core_vals( year, month, var ):
         if era_value.size > 0 and not era_value.isnull().all():
             results.append(era_value.values)  # Append the nearest array (pressure levels)
         else:
-            results.append(np.full_like(ERA_var.pressure_level.values, np.nan))  # Append NaNs
+            results.append(np.nan)  # Append NaNs
 
     # Create the DataFrame, including all variables from DD
     df = pd.DataFrame(DD[:, :len(convective_vars)], columns=convective_vars)
@@ -89,11 +93,10 @@ def collocate_ERA5_3D_core_vals( year, month, var ):
     ds = xr.Dataset(
         {
             **{var: (["occurrence"], df[conv_var].values) for conv_var in convective_vars},
-            f"{var}": (["occurrence", "pressure_level"], np.array(results)),
+            f"{var}": (["occurrence"], np.array(results)),
         },
         coords={
             "occurrence": np.arange(len(df)),
-            "pressure_level": ERA_var.pressure_level.values,
         },
     )
     ds.to_netcdf(netcdf_file)
@@ -105,7 +108,7 @@ if __name__ == "__main__":
 
     # Check that the user provided the correct number of arguments
     if len(sys.argv) != 4:
-        print( "Usage: python collocate_ERA5_3D_core_vals.py <year> <month> <variable>" )
+        print( "Usage: python collocate_ERA5_2D_core_vals.py <year> <month> <variable>" )
         sys.exit(1)
 
     # Parse arguments
@@ -114,5 +117,5 @@ if __name__ == "__main__":
     var = sys.argv[3]  # Third argument is the variable name (e.g., 'cape')
 
     # Call the function
-    collocate_ERA5_3D_core_vals(year, month, var)
+    collocate_ERA5_2D_core_vals(year, month, var)
 
