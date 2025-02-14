@@ -44,7 +44,7 @@ def zero_buoyancy_plume_alt( environmental_T, environmental_qv, environmental_p,
     CAPE = simps( x=altitudes, y=buoyancy )
     return CAPE, buoyancy
 
-def CAPEdiff( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes ):
+def CAPEdiff_alt( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes ):
     import numpy as np
     from plotting_utilities import bin_stat_function
     
@@ -59,7 +59,7 @@ def CAPEdiff( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in,
     return np.nansum( (cape99_vals_zbp[1:16] - evaluation_field[1:16])**2 )
 
 
-def tune_entrainment( epsilon_range, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes ):
+def tune_entrainment_alt( epsilon_range, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes ):
     results = []
     for epsilon in epsilon_range:
         result = CAPEdiff( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes )

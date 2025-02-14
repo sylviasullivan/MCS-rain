@@ -5,8 +5,8 @@ c.retrieve(
     {
         'product_type':'reanalysis',
         'variable':'convective_available_potential_energy',
-        'year':'2000',
-        'month':'05',
+        'year':'2004',
+        'month':'12',
         'day':['01','02','03','04','05','06','07',
                '08','09','10','11','12','13','14',
                '15','16','17','18','19','20','21',

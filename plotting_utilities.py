@@ -23,6 +23,16 @@ warnings.filterwarnings(action='ignore')
 def RCE_concat( input_arrays, var ):
     return np.concatenate( [ii[var].to_numpy() for ii in input_arrays], axis=0 )
 
+def read_RCE_files_cg( path ):
+    mean_300 = xr.open_dataset( path + 'RCE_COL_MEAN_300_cg.nc' )
+    p99_300 = xr.open_dataset( path + 'RCE_COL_99_300_cg.nc' )
+    clusters_300 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_300_cg.nc' )
+    rad_300 = []
+    for c in clusters_300['cluster_sizes'].values:
+        rad_300.append( 2*(c*9/np.pi)**(0.5) )
+    
+    return mean_300, p99_300, rad_300
+
 def read_RCE_files( path ):
     mean_290 = xr.open_dataset( path + 'RCE_COL_MEAN_290.nc' )
     mean_295 = xr.open_dataset( path + 'RCE_COL_MEAN_295.nc' )
@@ -91,7 +101,7 @@ def file_concatenator_ERAI(numerical_list):
     return file_names
 
 
-def file_concatenator_ERA5(numerical_list):
+def file_concatenator_ERA5_NZ(numerical_list):
     #Takes a list of numbers corresponding to filenumbers/years
     #and compiles the corresponding list of filenames
     file_names = []
@@ -106,6 +116,21 @@ def file_concatenator_ERA5(numerical_list):
 
     return file_names
 
+
+def file_concatenator_ERA5(numerical_list):
+    #Takes a list of numbers corresponding to filenumbers/years
+    #and compiles the corresponding list of filenames
+    file_names = []
+
+    #base directory where the desired files are located
+    basedir = '/groups/sylvia/JAS-MCS-rain/ERA5/'
+
+    #iterates through numbers
+    for value in numerical_list:
+        #appending list of files
+        file_names = np.append(file_names,(basedir + 'colloc5_' + str(value) + '.nc'))
+
+    return file_names
 
 
 def nc_open_compile(files,variable_name,compile_type='append'):

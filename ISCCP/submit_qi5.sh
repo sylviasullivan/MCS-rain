@@ -12,8 +12,8 @@
 
 #source activate era5
 
-for year in 2000 2001 2003 2004; do
-    for month in 1 2 3 4 5 6 7 8 9 10 11; do
+for year in 2003; do
+    for month in 12; do
         echo Starting for year $year and month $month
 
         # Dynamically handle single-digit and double-digit months

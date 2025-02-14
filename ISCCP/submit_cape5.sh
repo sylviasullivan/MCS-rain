@@ -5,15 +5,15 @@
 #SBATCH --qos=user_qos_sylvia
 #SBATCH --output=/xdisk/sylvia/ERA_logs/capelog_%j.out
 #SBATCH --error=/xdisk/sylvia/ERA_logs/capelog_%j.out
-#SBATCH --time=24:00:00
+#SBATCH --time=6:00:00
 #SBATCH --mem=50gb
 #SBATCH --nodes=1
 #SBATCH --ntasks=6
 
 #source activate era5
 
-for year in 2000; do
-    for month in 1 2 3 4 5 6 7 8 9 10 11; do
+for year in 2004; do
+    for month in 4 5 6 7 8 9 10 11 12; do
         echo Starting for year $year and month $month
 
         # Dynamically handle single-digit and double-digit months
