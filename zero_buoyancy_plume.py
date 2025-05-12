@@ -62,6 +62,6 @@ def CAPEdiff_alt( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv
 def tune_entrainment_alt( epsilon_range, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes ):
     results = []
     for epsilon in epsilon_range:
-        result = CAPEdiff( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes )
+        result = CAPEdiff_alt( epsilon, evaluation_field, nbin, sdupper, sd_in, pc2, T_in, qv_in, P_in, altitudes )
         results.append( (epsilon, result) )
     return results

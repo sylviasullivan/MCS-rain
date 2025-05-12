@@ -23,15 +23,24 @@ warnings.filterwarnings(action='ignore')
 def RCE_concat( input_arrays, var ):
     return np.concatenate( [ii[var].to_numpy() for ii in input_arrays], axis=0 )
 
-def read_RCE_files_cg( path ):
-    mean_300 = xr.open_dataset( path + 'RCE_COL_MEAN_300_cg.nc' )
-    p99_300 = xr.open_dataset( path + 'RCE_COL_99_300_cg.nc' )
-    clusters_300 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_300_cg.nc' )
-    rad_300 = []
-    for c in clusters_300['cluster_sizes'].values:
-        rad_300.append( 2*(c*9/np.pi)**(0.5) )
+def read_RCE_files_cg( path, suffix ):
+    mean_300 = xr.open_dataset( path + 'RCE_COL_MEAN_300_cg' + suffix + '.nc' )
+    mean_305 = xr.open_dataset( path + 'RCE_COL_MEAN_305_cg' + suffix + '.nc' )
+    means = [ mean_300, mean_305 ]
     
-    return mean_300, p99_300, rad_300
+    p99_300 = xr.open_dataset( path + 'RCE_COL_99_300_cg' + suffix + '.nc' )
+    p99_305 = xr.open_dataset( path + 'RCE_COL_99_305_cg' + suffix + '.nc' )
+    p99s = [ p99_300, p99_305 ]
+    
+    clusters_300 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_300_cg' + suffix + '.nc' )
+    clusters_305 = xr.open_dataset( path + 'RCE_COL_cluster-sizes_305_cg' + suffix + '.nc' )
+    clusters = [ clusters_300, clusters_305 ]
+    
+    rad = []
+    for c in clusters:
+        rad.append( 2*(c['cluster_sizes']*9/np.pi)**(0.5) )
+    
+    return means, p99s, rad
 
 def read_RCE_files( path ):
     mean_290 = xr.open_dataset( path + 'RCE_COL_MEAN_290.nc' )
